@@ -1,7 +1,9 @@
 defmodule Kword do
-  @moduledoc """
-  Keyword list utilities intended for ergonomic
-  """
+  @moduledoc "README.md"
+             |> File.read!()
+             |> String.split("<!-- MDOC !-->")
+             |> Enum.fetch!(1)
+
   require Logger
 
   # values is a keyword list:
@@ -58,29 +60,15 @@ defmodule Kword do
   end
 
   @doc """
-  Map over `params`, each element of which is either an atom or a 2-tuple {atom, default}, getting
-  the value of the first occurrence of the atom key in the keyword list `opts`, and if not found the
-  default is used, or nil if there is no default.
+  Like `extract/2` except any keys supplied in opts that are not declared in params result in an error tuple.
 
   ## Examples
 
-      iex> Kword.extract_permissive([x: 1, y: 2, z: 3], [:w, x: 10, a: 7, b: 8])
-      [nil, 1, 7, 8]
-  """
-  def extract_permissive(opts, params) when is_list(opts) and is_list(params) do
-    Enum.map(params, fn elt ->
-      case elt do
-        {key, default} when is_atom(key) ->
-          Keyword.get(opts, key, default)
+      iex> Kword.extract_exhaustive([x: 1], [:x, y: 7])
+      {:ok, [1, 7]}
 
-        key when is_atom(key) ->
-          Keyword.get(opts, key)
-      end
-    end)
-  end
-
-  @doc """
-  Like `extract/2` except any keys supplied in opts that are not declared in params result in an error tuple.
+      iex> Kword.extract_exhaustive([x: 1, z: 3], [:x, y: 7])
+      {:error, {:unexpected, :z}}
   """
   def extract_exhaustive(opts, params) do
     expected =
@@ -113,10 +101,44 @@ defmodule Kword do
     end
   end
 
+  @doc """
+  Like `extract_exhaustive/2` but raises an `ArgumentError` with the first key that was unexpected,
+
+
+  ## Examples
+
+      iex> Kword.extract_exhaustive!([x: 1], [:x, y: 7])
+      [1, 7]
+
+      iex> Kword.extract_exhaustive!([x: 1, z: 3], [:x, y: 7])
+      ** (ArgumentError) Unexpected key :z
+  """
   def extract_exhaustive!(opts, params) do
     opts
     |> extract_exhaustive(params)
     |> maybe_raise()
+  end
+
+  @doc """
+  Map over `params`, each element of which is either an atom or a 2-tuple {atom, default}, getting
+  the value of the first occurrence of the atom key in the keyword list `opts`, and if not found the
+  default is used, or nil if there is no default.
+
+  ## Examples
+
+      iex> Kword.extract_permissive([x: 1, y: 2, z: 3], [:w, x: 10, a: 7, b: 8])
+      [nil, 1, 7, 8]
+  """
+  def extract_permissive(opts, params) when is_list(opts) and is_list(params) do
+    Enum.map(params, fn elt ->
+      case elt do
+        {key, default} when is_atom(key) ->
+          Keyword.get(opts, key, default)
+
+        key when is_atom(key) ->
+          Keyword.get(opts, key)
+      end
+    end)
   end
 
   @compile :inline
