@@ -35,7 +35,7 @@ defmodule Kword.MixProject do
 
   def package do
     [
-      name: "Kword",
+      name: "kword",
       description: "A library of keyword-list handling functions to complement Keyword",
       maintainers: "Andy Kirkatrick",
       licenses: ["Apache-2.0"],
