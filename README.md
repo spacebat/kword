@@ -32,6 +32,10 @@ If you don't want to allow parameters that aren't specified, use `extract_exhaus
 
 And if you just want to pluck values out of a keyword list in the order specified, use `extract_permissive` which will default parameters to nil that have no default specified.
 
+## Alpha Code
+
+The API may change slightly, most likely change would be the function names if people come up with better ones. If so the old names will be supported for some time.
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
